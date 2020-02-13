@@ -1,2 +1,29 @@
 # topoi-core
-A simple, explicit core language for topoi programming language.
+
+This is the main codebase of Topoi Core. A simple, explicit core language for topoi programming language.
+
+## What is Topoi Core?
+
+Just like GHC's core, the Topoi core is the minimal representation of topoi programming (that syntax is yet to be decided). This allows us to proof the language semantics and focus on our type system.
+
+## Code Structure
+
+Topoi core is (now) written in Rust programming language. Our program only runs on the test case, which means you are going to directly write the AST in rust.
+
+To run it. Just edit the test block in `src/lib.rs` and run `cargo test`. This operation do require you to have **rustc** and **cargo** installed
+
+We have a plan to support text based language file parser (see below).
+
+## Roadmap
+
+- [x] Reading the book 'The Little Typer'
+- [ ] Decide the AST
+- [ ] Decide the syntax of topoi core
+- [ ] Parser
+- [ ] Lexer / pretty printer / formatter
+
+## Issue and Contribution
+
+Please use Github issues for bug reports and requests. To contribute directly, open a pull request on [Github repo](https://github.com/topoi-lang/topoi-core/issues). Files must be contributed under the MIT license.
+
+If you see something that can be improved, please contribute or contact us!
