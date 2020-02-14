@@ -1,37 +1,40 @@
 #[derive(Clone, PartialEq, Debug)]
 pub enum Node {
-    Atom(Atom),
-    List(List),
-    Type(i64)
+    Atom(&'static str),
+    Pair(Box<Node>, Box<Node>),
+    Type(Type),
 }
 
-pub type Atom = &'static str;
-
-// =====================================
-// List
-// =====================================
-pub type List = Vec<Node>;
-
-pub fn cons(list: List, atom: Atom) -> Node {
-    let mut cloned_list = list.clone();
-    cloned_list.push(Node::Atom(atom));
-    Node::List(cloned_list)
+#[derive(Clone, PartialEq, Debug)]
+pub enum Type {
+    Universe(i64),
+    Atom,
+    Pair(Box<Type>, Box<Type>)
 }
 
-pub fn car(list: List) -> Node {
-    list.first().unwrap().clone()
+pub fn cons(node: Node, atom: Node) -> Node {
+    Node::Pair(Box::new(node), Box::new(atom))
 }
 
-pub fn cdr(list: List) -> Node {
-    let mut cloned_list = list.clone();
-    cloned_list.remove(0);
-    Node::List(cloned_list)
-}
-
-pub fn type_of(node: Node) -> Node {
+pub fn car(node: Node) -> Result<Node, &'static str> {
     match node {
-        Node::Atom(_) => Node::Type(0),
-        Node::List(_) => Node::Type(0),
-        Node::Type(n) => Node::Type(n + 1)
+        Node::Pair(a, _) => Result::Ok(*a),
+        _ => Result::Err("Can only apply car to Pair")
+    }
+}
+
+pub fn cdr(node: Node) -> Result<Node, &'static str> {
+    match node {
+        Node::Pair(_, b) => Result::Ok(*b),
+        _ => Result::Err("Cannot apply cdr to Pair")
+    }
+}
+
+pub fn type_of(node: Node) -> Type {
+    match node {
+        Node::Atom(_) => Type::Atom,
+        Node::Pair(a, b) => Type::Pair(Box::new(type_of(*a)), Box::new(type_of(*b))),
+        Node::Type(Type::Universe(n)) => Type::Universe(n + 1),
+        Node::Type(_) => Type::Universe(0)
     }
 }
