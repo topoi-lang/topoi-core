@@ -1,40 +1,42 @@
 #[derive(Clone, PartialEq, Debug)]
 pub enum Node {
     Atom(&'static str),
-    Pair(Box<Node>, Box<Node>),
-    Type(Type),
+    PairNode(Pair<Node>),
+    TypeNode(Type),
+    Unit,
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Type {
     Universe(i64),
-    Atom,
-    Pair(Box<Type>, Box<Type>)
+    AtomTy,
+    PairTy(Pair<Type>),
+    Unit,
 }
 
-pub fn cons(node: Node, atom: Node) -> Node {
-    Node::Pair(Box::new(node), Box::new(atom))
-}
+#[derive(Clone, PartialEq, Debug)]
+pub struct Pair<T>(pub Box<T>, pub Box<T>);
 
-pub fn car(node: Node) -> Result<Node, &'static str> {
-    match node {
-        Node::Pair(a, _) => Result::Ok(*a),
-        _ => Result::Err("Can only apply car to Pair")
+impl<T> Pair<T> {
+    pub fn cons(node1: T, node2: T) -> Pair<T> {
+        Pair(Box::new(node1), Box::new(node2))
     }
-}
 
-pub fn cdr(node: Node) -> Result<Node, &'static str> {
-    match node {
-        Node::Pair(_, b) => Result::Ok(*b),
-        _ => Result::Err("Cannot apply cdr to Pair")
+    pub fn car(self) -> T {
+        *self.0
+    }
+
+    pub fn cdr(self) -> T {
+        *self.1
     }
 }
 
 pub fn type_of(node: Node) -> Type {
     match node {
-        Node::Atom(_) => Type::Atom,
-        Node::Pair(a, b) => Type::Pair(Box::new(type_of(*a)), Box::new(type_of(*b))),
-        Node::Type(Type::Universe(n)) => Type::Universe(n + 1),
-        Node::Type(_) => Type::Universe(0)
+        Node::Atom(_) => Type::AtomTy,
+        Node::PairNode(p) => Type::PairTy(Pair(Box::new(type_of(*p.0)), Box::new(type_of(*p.1)))),
+        Node::TypeNode(Type::Universe(n)) => Type::Universe(n + 1),
+        Node::TypeNode(_) => Type::Universe(0),
+        Node::Unit => Type::Unit,
     }
 }
