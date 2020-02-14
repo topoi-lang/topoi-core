@@ -9,8 +9,8 @@ pub enum Node {
 #[derive(Clone, PartialEq, Debug)]
 pub enum Type {
     Universe(i64),
-    AtomTy,
-    PairTy(Pair<Type>),
+    Atom,
+    Pair(Pair<Type>),
     Unit,
 }
 
@@ -33,8 +33,8 @@ impl<T> Pair<T> {
 
 pub fn type_of(node: Node) -> Type {
     match node {
-        Node::Atom(_) => Type::AtomTy,
-        Node::PairNode(p) => Type::PairTy(Pair(Box::new(type_of(*p.0)), Box::new(type_of(*p.1)))),
+        Node::Atom(_) => Type::Atom,
+        Node::PairNode(p) => Type::Pair(Pair(Box::new(type_of(*p.0)), Box::new(type_of(*p.1)))),
         Node::TypeNode(Type::Universe(n)) => Type::Universe(n + 1),
         Node::TypeNode(_) => Type::Universe(0),
         Node::Unit => Type::Unit,

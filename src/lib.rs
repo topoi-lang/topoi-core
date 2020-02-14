@@ -106,12 +106,10 @@ mod tests {
         )
     }
 
-    // #[test]
-    // fn type_of_term() {
-    //     use crate::node::type_of;
-    //     use crate::node::Type;
-    //     assert_eq!(type_of(Atom("yo")), Type::Atom);
-    //     // assert_eq!(type_of(List(vec![])), Type::Pair());
-    //     assert_eq!(type_of(Type)), Type::Universe(1));
-    // }
+    #[test]
+    fn type_of_term() {
+        use crate::node::type_of;
+        use crate::node::Type;
+        assert_eq!(type_of(Atom("yo")), Type::Atom);
+    }
 }
