@@ -8,7 +8,7 @@ pub enum Node {
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Type {
-    Universe(u32),
+    Universe(i64),
     AtomTy,
     PairTy(Pair<Type>),
     Unit,
@@ -22,12 +22,12 @@ impl<T> Pair<T> {
         Pair(Box::new(node1), Box::new(node2))
     }
 
-    pub fn car(pair: Pair<T>) -> T {
-        *pair.0
+    pub fn car(self) -> T {
+        *self.0
     }
 
-    pub fn cdr(pair: Pair<T>) -> T {
-        *pair.1
+    pub fn cdr(self) -> T {
+        *self.1
     }
 }
 

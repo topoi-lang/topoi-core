@@ -13,58 +13,52 @@ mod tests {
     #[test]
     fn pair_cmp() {
         assert_eq!(
-            PairNode(Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Atom("ratatouille")),
-            }),
-            PairNode(Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Atom("ratatouille")),
-            })
+            PairNode(Pair(
+                Box::new(Atom("ratatouille")),
+                Box::new(Atom("ratatouille")),
+            )),
+            PairNode(Pair(
+                Box::new(Atom("ratatouille")),
+                Box::new(Atom("ratatouille")),
+            ))
         );
 
         assert_ne!(
-            PairNode(Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Atom("ratatouille")),
-            }),
-            PairNode(Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Atom("baguette")),
-            })
+            PairNode(Pair(
+                Box::new(Atom("ratatouille")),
+                Box::new(Atom("ratatouille"))
+            )),
+            PairNode(Pair(
+                Box::new(Atom("ratatouille")),
+                Box::new(Atom("baguette")),
+            ))
         );
 
         assert_ne!(
-            PairNode(Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Atom("ratatouille")),
-            }),
-            PairNode(Pair {
-                0: Box::new(Atom("baguette")),
-                1: Box::new(Atom("ratatouille")),
-            })
+            PairNode(Pair(
+                Box::new(Atom("ratatouille")),
+                Box::new(Atom("ratatouille")),
+            )),
+            PairNode(Pair(
+                Box::new(Atom("baguette")),
+                Box::new(Atom("ratatouille")),
+            ))
         );
 
         assert_ne!(
-            PairNode(Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Atom("baguette")),
-            }),
-            PairNode(Pair {
-                0: Box::new(Atom("baguette")),
-                1: Box::new(Atom("baguette")),
-            })
+            PairNode(Pair(
+                Box::new(Atom("ratatouille")),
+                Box::new(Atom("baguette")),
+            )),
+            PairNode(Pair(Box::new(Atom("baguette")), Box::new(Atom("baguette")),))
         );
 
         assert_ne!(
-            PairNode(Pair {
-                0: Box::new(Atom("baguette")),
-                1: Box::new(Atom("baguette")),
-            }),
-            PairNode(Pair {
-                0: Box::new(Atom("baguette")),
-                1: Box::new(Atom("ratatouille")),
-            })
+            PairNode(Pair(Box::new(Atom("baguette")), Box::new(Atom("baguette")),)),
+            PairNode(Pair(
+                Box::new(Atom("baguette")),
+                Box::new(Atom("ratatouille")),
+            ))
         );
     }
 
@@ -72,20 +66,17 @@ mod tests {
     fn pair_cons() {
         assert_eq!(
             Pair::cons(Atom("ratatouille"), Atom("baguette")),
-            Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Atom("baguette")),
-            }
+            Pair(Box::new(Atom("ratatouille")), Box::new(Atom("baguette")),)
         )
     }
 
     #[test]
     fn pair_car() {
         assert_eq!(
-            Pair::car(Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Atom("baguette")),
-            }),
+            Pair::car(Pair(
+                Box::new(Atom("ratatouille")),
+                Box::new(Atom("baguette"))
+            )),
             Atom("ratatouille")
         );
     }
@@ -93,25 +84,25 @@ mod tests {
     #[test]
     fn pair_cdr() {
         assert_eq!(
-            Pair::cdr(Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Atom("baguette")),
-            }),
+            Pair::cdr(Pair(
+                Box::new(Atom("ratatouille")),
+                Box::new(Atom("baguette")),
+            )),
             Atom("baguette")
         );
 
         assert_eq!(
-            Pair::cdr(Pair {
-                0: Box::new(Atom("ratatouille")),
-                1: Box::new(Node::PairNode(Pair {
-                    0: Box::new(Atom("baguette")),
-                    1: Box::new(Atom("aubergine")),
-                }))
-            }),
-            Node::PairNode(Pair {
-                0: Box::new(Atom("baguette")),
-                1: Box::new(Atom("aubergine")),
-            })
+            Pair::cdr(Pair(
+                Box::new(Atom("ratatouille")),
+                Box::new(Node::PairNode(Pair(
+                    Box::new(Atom("baguette")),
+                    Box::new(Atom("aubergine")),
+                ))),
+            )),
+            Node::PairNode(Pair(
+                Box::new(Atom("baguette")),
+                Box::new(Atom("aubergine")),
+            ))
         )
     }
 
