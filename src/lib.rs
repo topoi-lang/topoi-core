@@ -2,6 +2,7 @@ pub mod node;
 
 #[cfg(test)]
 mod tests {
+    use crate::node::*;
     use crate::node::Node::*;
 
     #[test]
@@ -57,5 +58,12 @@ mod tests {
             ]),
             List(vec![Atom("baguette"), Atom("aubergine")])
         )
+    }
+
+    #[test]
+    fn type_of_term() {
+        assert_eq!(type_of(Atom("yo")), Type(0));
+        assert_eq!(type_of(List(vec![])), Type(0));
+        assert_eq!(type_of(Type(0)), Type(1))
     }
 }
