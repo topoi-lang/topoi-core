@@ -1,15 +1,20 @@
 pub mod node;
+pub mod helper;
 
 #[cfg(test)]
-mod tests {
+mod atom_test {
     use crate::node::Node::*;
-    use crate::node::*;
     #[test]
     fn atom_cmp() {
         assert_eq!(Atom("ratatouille"), Atom("ratatouille"));
         assert_ne!(Atom("ratatouille"), Atom("baguette"))
     }
+}
 
+#[cfg(test)]
+mod pair_test {
+    use crate::node::Node::*;
+    use crate::node::*;
     #[test]
     fn pair_cmp() {
         assert_eq!(
@@ -111,5 +116,17 @@ mod tests {
         use crate::node::type_of;
         use crate::node::Type;
         assert_eq!(type_of(Atom("yo")), Type::Atom);
+        assert_eq!(type_of(TypeNode(Type::Universe(0))), Type::Universe(1));
+        assert_eq!(type_of(TypeNode(Type::Universe(1))), Type::Universe(2));
+    }
+}
+
+#[cfg(test)]
+mod judgement {
+    use crate::node::Node::*;
+    use crate::helper::*;
+    #[test]
+    fn same_type() {
+        assert_eq!(is_same_type(Atom("a"), Atom("b")), true)
     }
 }
