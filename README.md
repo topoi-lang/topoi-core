@@ -1,5 +1,7 @@
 # topoi-core
 
+![Building](https://github.com/topoi-lang/topoi-core/workflows/Rust/badge.svg)
+
 This is the main codebase of Topoi Core. A simple, explicit core language for topoi programming language.
 
 ## What is Topoi Core?
