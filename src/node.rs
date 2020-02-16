@@ -1,37 +1,42 @@
 #[derive(Clone, PartialEq, Debug)]
 pub enum Node {
-    Atom(Atom),
-    List(List),
-    Type(i64)
+    Atom(&'static str),
+    PairNode(Pair<Node>),
+    TypeNode(Type),
+    Unit,
 }
 
-pub type Atom = &'static str;
-
-// =====================================
-// List
-// =====================================
-pub type List = Vec<Node>;
-
-pub fn cons(list: List, atom: Atom) -> Node {
-    let mut cloned_list = list.clone();
-    cloned_list.push(Node::Atom(atom));
-    Node::List(cloned_list)
+#[derive(Clone, PartialEq, Debug)]
+pub enum Type {
+    Universe(i64),
+    Atom,
+    Pair(Pair<Type>),
+    Unit,
 }
 
-pub fn car(list: List) -> Node {
-    list.first().unwrap().clone()
+#[derive(Clone, PartialEq, Debug)]
+pub struct Pair<T>(pub Box<T>, pub Box<T>);
+
+impl<T> Pair<T> {
+    pub fn cons(node1: T, node2: T) -> Pair<T> {
+        Pair(Box::new(node1), Box::new(node2))
+    }
+
+    pub fn car(self) -> T {
+        *self.0
+    }
+
+    pub fn cdr(self) -> T {
+        *self.1
+    }
 }
 
-pub fn cdr(list: List) -> Node {
-    let mut cloned_list = list.clone();
-    cloned_list.remove(0);
-    Node::List(cloned_list)
-}
-
-pub fn type_of(node: Node) -> Node {
+pub fn type_of(node: Node) -> Type {
     match node {
-        Node::Atom(_) => Node::Type(0),
-        Node::List(_) => Node::Type(0),
-        Node::Type(n) => Node::Type(n + 1)
+        Node::Atom(_) => Type::Atom,
+        Node::PairNode(p) => Type::Pair(Pair(Box::new(type_of(*p.0)), Box::new(type_of(*p.1)))),
+        Node::TypeNode(Type::Universe(n)) => Type::Universe(n + 1),
+        Node::TypeNode(_) => Type::Universe(0),
+        Node::Unit => Type::Unit,
     }
 }
