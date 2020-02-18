@@ -14,6 +14,7 @@ pub enum Token {
     Number(String),
     OpenParen,
     CloseParen,
+    Whitespace(Whitespace)
 }
 
 impl fmt::Display for Token {
@@ -23,6 +24,23 @@ impl fmt::Display for Token {
             Token::Number(ref n) => f.write_str(n),
             Token::OpenParen => f.write_str("("),
             Token::CloseParen => f.write_str(")"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Whitespace {
+    Space,
+    Newline,
+    Tab,
+}
+
+impl fmt::Display for Whitespace {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Whitespace::Space => f.write_str(" "),
+            Whitespace::Newline => f.write_str("\n"),
+            Whitespace::Tab => f.write_str("\t"),
         }
     }
 }
@@ -55,7 +73,7 @@ impl Tokenizer {
         let mut tokens : Vec<Token> = vec![];
         while let Some(token) = self.next_token(&mut peekable)? {
             match &token {
-                _ => unimplemented!(),
+                _ => unimplemented!()
             }
         }
     }
@@ -63,8 +81,18 @@ impl Tokenizer {
     pub fn next_token(&self, chars: &mut Peekable<Chars<'_>>) -> Result<Option<Token>, String> {
         match chars.peek() {
             Some(&ch) => match ch {
+                ' ' => self.consume_and_return(ch, Token::Whitespace(Whitespace::Space)),
+                '\t' => self.consume_and_return(ch, Token::Whitespace(Whitespace::Tab)),
+                '\n' => self.consume_and_return(ch, Token::Whitespace(Whitespace::Newline)),
+                
                 _ => unimplemented!(),
             }
         }
     }
+
+    fn consume_and_return(&self, chars: &mut Peekable<Chars<'_>>, t: Token) -> Result<Option<Token>, TokenizerError> {
+        chars.next();
+        Ok(Some(t))
+    }
+
 }
