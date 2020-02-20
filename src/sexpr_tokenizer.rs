@@ -1,26 +1,5 @@
 use std::iter::Peekable;
 use std::str::Chars;
-/// A single data element in an s-expression. Floats are excluded to ensure
-/// atoms may be used as keys in ordered and hashed data structures.
-///
-/// All strings must be valid utf-8.
-#[derive(PartialEq, Clone, PartialOrd)]
-pub enum Atom {
-    /// N stands for node
-    N(String),
-    /// I stands for integer
-    I(i64),
-    /// F stands for floating integer (number that has a '.')
-    F(f64),
-}
-
-/// An s-expression is either an atom or a list of s-expressions. This is
-/// similar to the data format used by lisp.
-#[derive(PartialEq, Clone, PartialOrd)]
-pub enum Sexp {
-    Atom(Atom),
-    List(Vec<Sexp>),
-}
 
 /// The representation of an s-expression parse error.
 #[derive(Debug)]
@@ -163,54 +142,58 @@ fn peeking_take_while(
     s
 }
 
-#[test]
-fn empty_blob() {
-    let blob = "";
-    let tokens = Tokenizer::new(blob).tokenize().unwrap();
-    assert_eq!(tokens, vec![]);
-}
+#[cfg(test)]
+mod test {
+    use crate::sexpr_tokenizer::Whitespace::*;
+    use crate::sexpr_tokenizer::*;
+    #[test]
+    fn empty_blob() {
+        let blob = "";
+        let tokens = Tokenizer::new(blob).tokenize().unwrap();
+        assert_eq!(tokens, vec![]);
+    }
 
-#[test]
-fn atoms() {
-    use Whitespace::*;
-    let blob = "(foo 'bar 123 1.23)";
-    let tokens = Tokenizer::new(blob).tokenize().unwrap();
-    assert_eq!(
-        tokens,
-        vec![
-            Token::OpenParen,
-            Token::Word("foo".to_owned()),
-            Token::Whitespace(Space),
-            Token::Atom("bar".to_owned()),
-            Token::Whitespace(Space),
-            Token::Number("123".to_owned()),
-            Token::Whitespace(Space),
-            Token::Number("1.23".to_owned()),
-            Token::CloseParen,
-        ]
-    );
-}
+    #[test]
+    fn atoms() {
+        let blob = "(foo 'bar 123 1.23)";
+        let tokens = Tokenizer::new(blob).tokenize().unwrap();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::OpenParen,
+                Token::Word("foo".to_owned()),
+                Token::Whitespace(Space),
+                Token::Atom("bar".to_owned()),
+                Token::Whitespace(Space),
+                Token::Number("123".to_owned()),
+                Token::Whitespace(Space),
+                Token::Number("1.23".to_owned()),
+                Token::CloseParen,
+            ]
+        );
+    }
 
-#[test]
-fn surrogate_atom() {
-    let blob = "aa'aa";
-    let tokens = Tokenizer::new(blob).tokenize().unwrap();
-    assert_eq!(
-        tokens,
-        vec![Token::Word("aa".to_owned()), Token::Atom("aa".to_owned())]
-    )
-}
+    #[test]
+    fn surrogate_atom() {
+        let blob = "aa'aa";
+        let tokens = Tokenizer::new(blob).tokenize().unwrap();
+        assert_eq!(
+            tokens,
+            vec![Token::Word("aa".to_owned()), Token::Atom("aa".to_owned())]
+        )
+    }
 
-#[test]
-fn tailing_atom() {
-    let blob = "a'a'";
-    let tokens = Tokenizer::new(blob).tokenize().unwrap();
-    assert_eq!(
-        tokens,
-        vec![
-            Token::Word("a".to_owned()),
-            Token::Atom("a".to_owned()),
-            Token::Atom("".to_owned())
-        ]
-    )
+    #[test]
+    fn tailing_atom() {
+        let blob = "a'a'";
+        let tokens = Tokenizer::new(blob).tokenize().unwrap();
+        assert_eq!(
+            tokens,
+            vec![
+                Token::Word("a".to_owned()),
+                Token::Atom("a".to_owned()),
+                Token::Atom("".to_owned())
+            ]
+        )
+    }
 }
