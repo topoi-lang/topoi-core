@@ -23,8 +23,10 @@ pub enum Atom {
 /// [Seven lisp primitives, or ten?](https://stackoverflow.com/questions/3482389/how-many-primitives-does-it-take-to-build-a-lisp-machine-ten-seven-or-five)
 #[derive(PartialEq, Clone, PartialOrd)]
 pub enum Sexp {
+    /// Bottom type, ()
+    Unit,
     Atom(Atom),
-    List(Vec<Sexp>),
+    Pair(Box<Sexp>, Box<Sexp>),
 }
 
 pub struct Parser {
@@ -54,12 +56,74 @@ impl Parser {
         let mut expressions = vec![];
 
         loop {
+            if parser.peek_token().is_none() {
+                break;
+            }
             let expression = parser.parse_expression()?;
             expressions.push(expression);
         }
 
-        OK(expressions)
+        Ok(expressions)
     }
 
-    pub fn parse_expression(tokens: Vec<Token>) -> Result<Option<Sexp>, ParserError> {}
+    pub fn parse_expression(&mut self) -> Result<Sexp, ParserError> {
+        match self.next_token() {
+            Some(t) => match t {
+                Token::OpenParen => Ok(self.build_sexp()?),
+                Token::CloseParen => Err(ParserError::ParserError(
+                    "Unmatched right parenthesis".to_string(),
+                )),
+                _ => Err(ParserError::ParserError(
+                    "No root value outside of parenthesis".to_string(),
+                )),
+            },
+
+            None => Err(ParserError::ParserError(
+                "No expression is given. Quiting...".to_string(),
+            )),
+        }
+    }
+
+    pub fn build_sexp(&mut self) -> Result<Sexp, ParserError> {
+        match self.next_token() {
+            Some(t) => {}
+            None => Err(ParserError::ParserError("Unclosed parenthesis".to_string())),
+        }
+    }
+
+    /// Return the first non-whitespace token that has not yet been processed
+    /// (or None if reached end-of-file)
+    pub fn peek_token(&self) -> Option<Token> {
+        self.peek_nth_token(0)
+    }
+
+    /// Return nth non-whitespace token that has not yet been processed
+    pub fn peek_nth_token(&self, mut n: usize) -> Option<Token> {
+        let mut index = self.index;
+        loop {
+            index += 1;
+            match self.tokens.get(index - 1) {
+                Some(Token::Whitespace(_)) => continue,
+                non_whitespace => {
+                    if n == 0 {
+                        return non_whitespace.cloned();
+                    }
+                    n -= 1;
+                }
+            }
+        }
+    }
+
+    /// Return the first non-whitespace token that has not yet been processed
+    /// (or None if reached end-of-file) and mark it as processed. OK to call
+    /// repeatedly after reaching EOF.
+    pub fn next_token(&mut self) -> Option<Token> {
+        loop {
+            self.index += 1;
+            match self.tokens.get(self.index - 1) {
+                Some(Token::Whitespace(_)) => continue,
+                token => return token.cloned(),
+            }
+        }
+    }
 }
