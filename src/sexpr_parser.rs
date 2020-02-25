@@ -4,7 +4,7 @@ use crate::sexpr_tokenizer::*;
 /// atoms may be used as keys in ordered and hashed data structures.
 ///
 /// All strings must be valid utf-8.
-#[derive(PartialEq, Clone, PartialOrd)]
+#[derive(PartialEq, Clone, PartialOrd, Debug)]
 pub enum Atom {
     /// N stands for node
     N(String),
@@ -21,7 +21,7 @@ pub enum Atom {
 /// this enum or not.
 ///
 /// [Seven lisp primitives, or ten?](https://stackoverflow.com/questions/3482389/how-many-primitives-does-it-take-to-build-a-lisp-machine-ten-seven-or-five)
-#[derive(PartialEq, Clone, PartialOrd)]
+#[derive(PartialEq, Clone, PartialOrd, Debug)]
 pub enum Sexp {
     /// Bottom type, ()
     Unit,
@@ -67,6 +67,7 @@ impl Parser {
     }
 
     pub fn parse_expression(&mut self) -> Result<Sexp, ParserError> {
+        println!("next token: {:?}", self.peek_token());
         match self.next_token() {
             Some(t) => match t {
                 Token::OpenParen => Ok(self.build_sexp()?),
@@ -85,9 +86,34 @@ impl Parser {
     }
 
     pub fn build_sexp(&mut self) -> Result<Sexp, ParserError> {
-        match self.next_token() {
-            Some(t) => {}
-            None => Err(ParserError::ParserError("Unclosed parenthesis".to_string())),
+        let mut temp_sexp = vec![];
+        loop {
+            match self.next_token() { // It consumes the open parenthesis
+                Some(t) => match t {
+                    Token::Atom(s) => temp_sexp.push(Sexp::Atom(Atom::N(s))),
+                    Token::Word(s) => temp_sexp.push(Sexp::Atom(Atom::N(s))),
+                    Token::Number(number_literal) => {
+                        match number_literal.parse::<i64>() {
+                            Ok(n) => temp_sexp.push(Sexp::Atom(Atom::I(n))),
+                            Err(_) => match number_literal.parse::<f64>() {
+                                Ok(n) => temp_sexp.push(Sexp::Atom(Atom::F(n))),
+                                Err(_) => return Err(ParserError::ParserError("Error parsing number literal".to_string()))
+                            }
+                        }
+                    }
+                    Token::OpenParen => temp_sexp.push(self.build_sexp()?),
+                    Token::CloseParen => break,
+                    Token::Whitespace(_) => unreachable!(),
+                }
+                None => return Err(ParserError::ParserError("Unclosed parenthesis".to_string())),
+            }
+        }
+
+        match temp_sexp.len() {
+            0 => Ok(Sexp::Unit),
+            1 => Ok(temp_sexp[0].clone()),
+            2 => Ok(Sexp::Pair(Box::new(temp_sexp[0].clone()), Box::new(temp_sexp[1].clone()))),
+            _ => Ok(build_pair(temp_sexp)),
         }
     }
 
@@ -126,4 +152,23 @@ impl Parser {
             }
         }
     }
+}
+
+pub fn build_pair(expressions: Vec<Sexp>) -> Sexp {
+    expressions
+        .iter()
+        .fold(Sexp::Unit, |pair_tree, el| Sexp::Pair(Box::new(el.clone()), Box::new(pair_tree)))
+}
+
+#[cfg(test)]
+mod test {
+    // use crate::sexpr_parser::*;
+
+
+    // #[test]
+    // fn parse_expression() {
+    //     let blob = "(Giuseppe Verdi Louis)";
+    //     let sexp = Parser::parse(blob.to_owned()).unwrap();
+    //     assert_eq!(sexp, vec![]);
+    // }
 }
