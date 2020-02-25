@@ -154,7 +154,8 @@ impl Parser {
     }
 }
 
-pub fn build_pair(expressions: Vec<Sexp>) -> Sexp {
+pub fn build_pair(mut expressions: Vec<Sexp>) -> Sexp {
+    expressions.reverse();
     expressions
         .iter()
         .fold(Sexp::Unit, |pair_tree, el| Sexp::Pair(Box::new(el.clone()), Box::new(pair_tree)))
@@ -162,13 +163,41 @@ pub fn build_pair(expressions: Vec<Sexp>) -> Sexp {
 
 #[cfg(test)]
 mod test {
-    // use crate::sexpr_parser::*;
+    use crate::sexpr_parser::*;
+    use crate::sexpr_parser::Sexp::*;
+    use crate::sexpr_parser::Atom::*;
 
+    #[test]
+    fn parse_unit_expression() {
+        let blob = "()";
+        let sexp = Parser::parse(blob.to_owned()).unwrap();
+        assert_eq!(sexp, vec![Unit])
+    }
 
-    // #[test]
-    // fn parse_expression() {
-    //     let blob = "(Giuseppe Verdi Louis)";
-    //     let sexp = Parser::parse(blob.to_owned()).unwrap();
-    //     assert_eq!(sexp, vec![]);
-    // }
+    #[test]
+    fn parse_atom_expression() {
+        let blob = "(atom)";
+        let sexp = Parser::parse(blob.to_owned()).unwrap();
+        assert_eq!(sexp, vec![Atom(N("atom".to_string()))])
+    }
+
+    #[test]
+    fn parse_pair_atom_expression() {
+        let blob = "(Giuseppe Verdi)";
+        let sexp = Parser::parse(blob.to_owned()).unwrap();
+        assert_eq!(sexp, vec![
+            Pair(Box::new(Atom(N("Giuseppe".to_string()))), Box::new(Atom(N("Verdi".to_string()))))
+        ])
+    }
+
+    #[test]
+    fn parse_multiple_atom_expression() {
+        let blob = "(Giuseppe Verdi Louis)";
+        let sexp = Parser::parse(blob.to_owned()).unwrap();
+        assert_eq!(sexp, vec![
+            Pair(Box::new(Atom(N("Giuseppe".to_string()))),
+                Box::new(Pair(Box::new(Atom(N("Verdi".to_string()))),
+                    Box::new(Pair(Box::new(Atom(N("Louis".to_string()))), Box::new(Unit))))))
+        ]);
+    }
 }
